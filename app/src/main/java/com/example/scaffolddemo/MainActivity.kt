@@ -7,6 +7,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.BottomAppBar
@@ -25,9 +26,13 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
+import androidx.navigation.NavController
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
 import com.example.scaffolddemo.ui.theme.ScaffoldDemoTheme
 
-/*https://medium.com/@sedakundakitchen/creating-a-top-app-bar-with-material-design-3-jetpack-compose-1d7fe3c97d12*/
+
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -35,48 +40,60 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             ScaffoldDemoTheme {
-                Scaffold(
-                    topBar = { MyTopAppBar() },
-                    bottomBar = { MyBottomBar() },
-                    modifier = Modifier.fillMaxSize())
-                { innerPadding ->
-                    Greeting(
-                        name = "Android",
-                        modifier = Modifier.padding(innerPadding)
-                    )
-                }
+                ScaffoldApp()
             }
         }
     }
 }
 
 @Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
+fun Contentti(text: String, modifier: Modifier = Modifier) {
     Text(
-        text = "Hello $name!",
+        text = text,
         modifier = modifier
     )
 }
 
 @Preview(showBackground = true)
 @Composable
-fun GreetingPreview() {
+fun ScaffoldAppPreview() {
     ScaffoldDemoTheme {
-        Greeting("Android")
+        ScaffoldApp()
     }
 }
 
+@Composable
+fun ScaffoldApp() {
+    val navController = rememberNavController()
+    NavHost(navController = navController, startDestination = "Home")
+    {
+        composable("Home") { MainScreen(navController) }
+        composable("Info") { InfoScreen(navController) }
+        composable("Settings") { SettingsScreen(navController) }
+    }
+/*
+    Scaffold(
+        topBar = { MainTopBar() },
+        //bottomBar = { MyBottomBar() },
+        modifier = Modifier.fillMaxSize())
+    { innerPadding ->
+        Greeting(
+            name = "Android",
+            modifier = Modifier.padding(innerPadding)
+        )
+    }
+*/
+}
+
+/*https://medium.com/@sedakundakitchen/creating-a-top-app-bar-with-material-design-3-jetpack-compose-1d7fe3c97d12*/
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MyTopAppBar() {
+fun MainTopBar(
+    title: String, navController: NavController
+) {
     var expanded by remember { mutableStateOf(false) }
     TopAppBar(
-        title = {Text(text = "My App")},
-        navigationIcon = {
-            IconButton(onClick = { /*TODO*/ }) {
-                Icon(Icons.Filled.Menu, contentDescription = null)
-            }
-        },
+        title = { Text(text = title) },
         actions = {
             IconButton(onClick = {
                 expanded = !expanded
@@ -86,15 +103,16 @@ fun MyTopAppBar() {
             DropdownMenu(
                 expanded = expanded,
                 onDismissRequest = { expanded = false }) {
-                DropdownMenuItem(onClick = { /*TODO*/ },
+                DropdownMenuItem(onClick = { navController.navigate("Info") },
                     text = { Text(text = "Info") })
-                DropdownMenuItem(onClick = { /*TODO*/ },
+                DropdownMenuItem(onClick = { navController.navigate("Settings") },
                     text = { Text(text = "Settings") })
             }
         }
     )
 }
 
+/*
 @Composable
 fun MyBottomBar() {
     BottomAppBar(
@@ -102,4 +120,57 @@ fun MyBottomBar() {
             Text(text = "Bottom Bar")
         }
     )
+}
+*/
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun ScreenTopBar(title: String, navController: NavController) {
+    TopAppBar(
+        title = { Text(text = title) },
+        navigationIcon = {
+            IconButton(onClick = { navController.navigateUp() }) {
+                Icon(Icons.Filled.ArrowBack, contentDescription = null)
+            }
+        }
+    )
+}
+
+@Composable
+fun MainScreen(navController: NavController) {
+    Scaffold(
+        topBar = { MainTopBar("Main Screen", navController) },
+        modifier = Modifier.fillMaxSize())
+    { innerPadding ->
+        Contentti(
+            text = "Content for Home screen",
+            modifier = Modifier.padding(innerPadding)
+        )
+    }
+}
+
+@Composable
+fun InfoScreen(navController: NavController) {
+    Scaffold(
+        topBar = { ScreenTopBar("Info Screen", navController) },
+        modifier = Modifier.fillMaxSize())
+    { innerPadding ->
+        Contentti(
+            text = "Content for Info screen",
+            modifier = Modifier.padding(innerPadding)
+        )
+    }
+}
+
+@Composable
+fun SettingsScreen(navController: NavController) {
+    Scaffold(
+        topBar = { ScreenTopBar("Settings Screen", navController) },
+        modifier=Modifier.fillMaxSize())
+    { innerPadding ->
+        Contentti(
+            text = "Content for Settings screen",
+            modifier = Modifier.padding(innerPadding)
+        )
+    }
 }
